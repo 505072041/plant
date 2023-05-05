@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+	<property name="APP_NAME" value="plant" />
+
+	<springProfile name="dev">
+		<property name="LOG_FILE_PATH" value="target/log/" />
+	</springProfile>
+	
+	<springProfile name="test">
+		<property name="LOG_FILE_PATH" value="${catalina.home}/webapps/nbps-main-log/" />
+	</springProfile>
+	
+	<springProfile name="uat">
+		<property name="LOG_FILE_PATH" value="${catalina.home}/webapps/nbps-main-log/" />
+	</springProfile>
+
+	<springProfile name="prod">
+		<property name="LOG_FILE_PATH" value="${catalina.home}/webapps/nbps-main-log/" />
+	</springProfile>
+	
+	<springProfile name="stress">
+		<property name="LOG_FILE_PATH" value="${catalina.home}/webapps/nbps-main-log/" />
+	</springProfile>
+
+	<!--設置 Log 輸出格式 -->
+	<property name="PATTERN_FORMAT"
+		value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %class{36} %L %M - %msg%xEx%n" />
+	<contextName>logback</contextName>
+	<!--輸出到 Console -->
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${PATTERN_FORMAT}</pattern>
+		</encoder>
+	</appender>
+
+	<!--輸出到檔案 -->
+	<appender name="info"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<!--  <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+			<pattern>${PATTERN_FORMAT}</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- 非同步輸出 -->
+    <appender name="ASYNC-INFO" class="ch.qos.logback.classic.AsyncAppender">
+		<!-- 不丟失日誌.預設的,如果佇列的80%已滿,則會丟棄TRACT、DEBUG、INFO級別的日誌 -->
+        <discardingThreshold>0</discardingThreshold>
+		<!-- 更改預設的佇列的深度,該值會影響效能.預設值為256 -->
+        <queueSize>300</queueSize>
+		<!-- 新增附加的appender,最多隻能新增一個 -->
+        <appender-ref ref="info"/>
+    </appender>
+
+	<root level="info">
+		<appender-ref ref="console" />
+		<appender-ref ref="info" />
+	</root>
+
+	<springProfile name="dev">
+		<logger name="uitc.com" level="trace" />
+	</springProfile>
+	
+	<springProfile name="test">
+		<logger name="uitc.com" level="debug" />
+	</springProfile>
+	
+	<springProfile name="uat">
+		<logger name="uitc.com" level="debug" />
+	</springProfile>
+
+	<springProfile name="prod">
+		<logger name="uitc.com" level="info" />
+	</springProfile>
+	
+	<springProfile name="stress">
+		<logger name="uitc.com" level="info" />
+	</springProfile>
+	
+</configuration>
